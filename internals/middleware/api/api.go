@@ -6,7 +6,7 @@ import (
 )
 
 type MiddlewareApiInterface interface {
-	LogURL(ctx *fasthttp.RequestCtx)
+	LogURL(h fasthttp.RequestHandler) fasthttp.RequestHandler
 }
 
 type MiddlewareApi struct {
