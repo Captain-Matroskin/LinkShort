@@ -22,12 +22,18 @@ func runServer() {
 		SchemaName: "postgres",
 	}
 
-	connectionPostgres, errDB := build.CreateDb(dbConfig)
+	connectionPostgres, errDB := build.CreateConn(dbConfig)
 	if errDB != nil {
 		fmt.Println(errDB.Error())
 		os.Exit(2)
 	}
 	defer connectionPostgres.Close()
+
+	errCreateDB := build.CreateDB(connectionPostgres)
+	if errCreateDB != nil {
+		fmt.Println(errDB.Error())
+		os.Exit(2)
+	}
 
 	startStructure := build.SetUp(connectionPostgres)
 
