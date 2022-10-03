@@ -3,6 +3,7 @@ module LinkShortening
 go 1.17
 
 require (
+	github.com/aidarkhanov/nanoid v1.0.8
 	github.com/fasthttp/router v1.4.12
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgx/v4 v4.17.2

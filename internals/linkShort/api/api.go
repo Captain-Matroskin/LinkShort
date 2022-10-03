@@ -42,7 +42,7 @@ func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	linkShortOut, errIn := l.Application.CreateLinkShort(linkFull.Link)
+	linkShortOut, errIn := l.Application.CreateLinkShortApp(linkFull.Link)
 
 	errOut, resultOut, codeHTTP := checkError.CheckErrorCreateLinkShort(errIn)
 	if errOut != nil {

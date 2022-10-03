@@ -45,4 +45,5 @@ const (
 	LSHCreateLinkShortNotCommit            = "Link short not commit"
 	LSHCreateLinkShortNotInsertUniqueDB    = "ERROR: duplicate key value violates unique constraint \"link_link_key\" (SQLSTATE 23505)"
 	LSHCreateLinkShortNotInsertUnique      = "link is not unique"
+	LSHCreateLinkShortAppNotGenerate       = "link is not generate"
 )

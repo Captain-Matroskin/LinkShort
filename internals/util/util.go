@@ -5,6 +5,11 @@ import (
 	"strconv"
 )
 
+const (
+	LenLinkShort = 10
+	LinkDomain   = "ozon.click.ru" // test domain
+)
+
 type Result struct {
 	Status int         `json:"status"`
 	Body   interface{} `json:"body,omitempty"`
