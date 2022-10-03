@@ -5,6 +5,11 @@ import (
 	"strconv"
 )
 
+type Result struct {
+	Status int         `json:"status"`
+	Body   interface{} `json:"body,omitempty"`
+}
+
 func InterfaceConvertInt(value interface{}) (int, error) {
 	var intConvert int
 	var errorConvert error

@@ -1,14 +1,15 @@
 package orm
 
 import (
+	errPkg "LinkShortening/internals/myerror"
 	"context"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
 type LinkShortWrapperInterface interface {
-	CreateLinkShort()
-	TakeLinkShort()
+	CreateLinkShort(linkFull string, linkShort string) error
+	TakeLinkShort(linkShort string) (string, error)
 }
 
 type ConnectionInterface interface {
@@ -38,10 +39,45 @@ type LinkShortWrapper struct {
 	Conn ConnectionInterface
 }
 
-func (w *LinkShortWrapper) CreateLinkShort() {
+func (w *LinkShortWrapper) CreateLinkShort(linkFull string, linkShort string) error {
+	contextTransaction := context.Background()
+	tx, errBeginConn := w.Conn.Begin(contextTransaction)
+	if errBeginConn != nil {
+		return &errPkg.MyErrors{
+			Text: errPkg.LSHCreateLinkShortTransactionNotCreate,
+		}
+	}
 
+	defer tx.Rollback(contextTransaction)
+
+	_, errExecTx := tx.Exec(contextTransaction,
+		"INSERT INTO public.link (link, link_short) VALUES ($1, $2)", linkFull, linkShort)
+	if errExecTx != nil {
+		println(errExecTx.Error())
+		println(errPkg.LSHCreateLinkShortNotInsertUniqueDB)
+		switch errExecTx.Error() {
+		case errPkg.LSHCreateLinkShortNotInsertUniqueDB:
+			return &errPkg.MyErrors{
+				Text: errPkg.LSHCreateLinkShortNotInsertUnique,
+			}
+		default:
+			return &errPkg.MyErrors{
+				Text: errPkg.LSHCreateLinkShortNotInsert,
+			}
+		}
+	}
+
+	errCommitTx := tx.Commit(contextTransaction)
+	if errCommitTx != nil {
+		return &errPkg.MyErrors{
+			Text: errPkg.LSHCreateLinkShortNotCommit,
+		}
+	}
+
+	return nil
 }
 
-func (w *LinkShortWrapper) TakeLinkShort() {
+func (w *LinkShortWrapper) TakeLinkShort(linkShort string) (string, error) {
 
+	return "", nil //TODO(N): refactor
 }
