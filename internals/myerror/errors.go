@@ -40,10 +40,15 @@ const (
 
 // Error of LinkShort
 const (
-	LSHCreateLinkShortTransactionNotCreate = "transaction Create Link Short not create"
-	LSHCreateLinkShortNotInsert            = "Link short not insert"
-	LSHCreateLinkShortNotCommit            = "Link short not commit"
+	LSHCreateLinkShortTransactionNotCreate = "transaction Create Link Short not create CreateLinkShort"
+	LSHCreateLinkShortNotInsert            = "Link short not insert CreateLinkShort"
+	LSHCreateLinkShortNotCommit            = "Link short not commit CreateLinkShort"
 	LSHCreateLinkShortNotInsertUniqueDB    = "ERROR: duplicate key value violates unique constraint \"link_link_key\" (SQLSTATE 23505)"
-	LSHCreateLinkShortNotInsertUnique      = "link is not unique"
-	LSHCreateLinkShortAppNotGenerate       = "link is not generate"
+	LSHCreateLinkShortNotInsertUnique      = "link is not unique CreateLinkShort"
+	LSHCreateLinkShortAppNotGenerate       = "link is not generate CreateLinkShort"
+
+	LSHTakeLinkShortTransactionNotCreate = "transaction Take Link Short not create"
+	LSHTakeLinkShortNotFound             = "link full not found"
+	LSHTakeLinkShortNotScan              = "link full not scan"
+	LSHTakeLinkShortNotCommit            = "Link full not commit"
 )

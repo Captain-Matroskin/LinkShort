@@ -5,9 +5,13 @@ type LinkFull struct {
 }
 
 type LinkShort struct {
-	Link string
+	Link string `json:"link"`
 }
 
 type ResponseLinkShort struct {
 	LinkShort LinkShort `json:"link_short"`
+}
+
+type ResponseLinkFull struct {
+	LinkShort LinkFull `json:"link_full"`
 }

@@ -33,8 +33,8 @@ func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
 		RequestId: reqId,
 	}
 
-	var linkFull linkShort.LinkFull
-	errUnmarshal := json.Unmarshal(ctx.Request.Body(), &linkFull)
+	var linkFullIn linkShort.LinkFull
+	errUnmarshal := json.Unmarshal(ctx.Request.Body(), &linkFullIn)
 	if errUnmarshal != nil {
 		ctx.Response.SetStatusCode(http.StatusInternalServerError)
 		ctx.Response.SetBody([]byte(errPkg.ErrUnmarshal))
@@ -42,7 +42,7 @@ func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	linkShortOut, errIn := l.Application.CreateLinkShortApp(linkFull.Link)
+	linkShortOut, errIn := l.Application.CreateLinkShortApp(linkFullIn.Link)
 
 	errOut, resultOut, codeHTTP := checkError.CheckErrorCreateLinkShort(errIn)
 	if errOut != nil {
@@ -86,6 +86,53 @@ func (l *LinkShortApi) TakeLinkShortHandler(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetBody([]byte(errConvert.Error()))
 		return
 	}
-	_ = reqId //TODO(N): refactor
+
+	checkError := &errPkg.CheckError{
+		RequestId: reqId,
+	}
+
+	var linkShortIn linkShort.LinkShort
+	errUnmarshal := json.Unmarshal(ctx.Request.Body(), &linkShortIn)
+	if errUnmarshal != nil {
+		ctx.Response.SetStatusCode(http.StatusInternalServerError)
+		ctx.Response.SetBody([]byte(errPkg.ErrUnmarshal))
+		fmt.Println(errUnmarshal.Error())
+		return
+	}
+
+	linkFullOut, errIn := l.Application.TakeLinkShortApp(linkShortIn.Link)
+
+	errOut, resultOut, codeHTTP := checkError.CheckErrorTakeLinkShort(errIn)
+	if errOut != nil {
+		switch errOut.Error() {
+		case errPkg.ErrMarshal:
+			ctx.Response.SetStatusCode(codeHTTP)
+			ctx.Response.SetBody([]byte(errPkg.ErrMarshal))
+			return
+		case errPkg.ErrCheck:
+			ctx.Response.SetStatusCode(codeHTTP)
+			ctx.Response.SetBody(resultOut)
+			return
+		}
+	}
+
+	request, errRequest := json.Marshal(&util.Result{
+		Status: http.StatusCreated,
+		Body: linkShort.ResponseLinkFull{
+			LinkShort: linkShort.LinkFull{
+				Link: linkFullOut,
+			},
+		},
+	})
+	if errRequest != nil {
+		ctx.Response.SetStatusCode(http.StatusInternalServerError)
+		ctx.Response.SetBody([]byte(errPkg.ErrEncode))
+		println(errRequest.Error())
+		return
+	}
+
+	ctx.Response.SetBody(request)
+	json.NewEncoder(ctx)
+	ctx.Response.SetStatusCode(http.StatusOK)
 
 }

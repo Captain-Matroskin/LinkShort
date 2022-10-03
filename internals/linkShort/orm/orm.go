@@ -78,6 +78,37 @@ func (w *LinkShortWrapper) CreateLinkShort(linkFull string, linkShort string) er
 }
 
 func (w *LinkShortWrapper) TakeLinkShort(linkShort string) (string, error) {
+	contextTransaction := context.Background()
+	tx, errBeginConn := w.Conn.Begin(contextTransaction)
+	if errBeginConn != nil {
+		return "", &errPkg.MyErrors{
+			Text: errPkg.LSHTakeLinkShortTransactionNotCreate,
+		}
+	}
 
-	return "", nil //TODO(N): refactor
+	defer tx.Rollback(contextTransaction)
+
+	var linkFull string
+	errQueryRow := tx.QueryRow(contextTransaction,
+		"SELECT link FROM public.link WHERE link_short = $1",
+		linkShort).Scan(linkFull)
+	if errQueryRow != nil {
+		if errQueryRow == pgx.ErrNoRows {
+			return "", &errPkg.MyErrors{
+				Text: errPkg.LSHTakeLinkShortNotFound,
+			}
+		}
+		return "", &errPkg.MyErrors{
+			Text: errPkg.LSHTakeLinkShortNotScan,
+		}
+	}
+
+	errCommitTx := tx.Commit(contextTransaction)
+	if errCommitTx != nil {
+		return "", &errPkg.MyErrors{
+			Text: errPkg.LSHTakeLinkShortNotCommit,
+		}
+	}
+
+	return linkFull, nil
 }
