@@ -9,7 +9,7 @@ import (
 
 type LinkShortWrapperInterface interface {
 	CreateLinkShort(linkFull string, linkShort string) error
-	TakeLinkShort(linkShort string) (string, error)
+	TakeLinkFull(linkShort string) (string, error)
 }
 
 type ConnectionInterface interface {
@@ -77,7 +77,7 @@ func (w *LinkShortWrapper) CreateLinkShort(linkFull string, linkShort string) er
 	return nil
 }
 
-func (w *LinkShortWrapper) TakeLinkShort(linkShort string) (string, error) {
+func (w *LinkShortWrapper) TakeLinkFull(linkShort string) (string, error) {
 	contextTransaction := context.Background()
 	tx, errBeginConn := w.Conn.Begin(contextTransaction)
 	if errBeginConn != nil {

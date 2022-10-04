@@ -102,3 +102,47 @@ func (c *CheckError) CheckErrorTakeLinkShort(err error) (error, []byte, int) {
 	}
 	return nil, nil, IntNil
 }
+
+func (c *CheckError) CheckErrorCreateLinkShortGrpc(err error) (error, string, int) {
+	if err != nil {
+		switch err.Error() {
+		case LSHCreateLinkShortNotInsertUnique:
+			println(err.Error())
+			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			return &MyErrors{
+					Text: ErrCheck,
+				},
+				LSHCreateLinkShortNotInsertUnique, http.StatusConflict
+		default:
+			println(err.Error())
+			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			return &MyErrors{
+					Text: ErrInternal,
+				},
+				ErrDB, http.StatusInternalServerError
+		}
+	}
+	return nil, "", IntNil
+}
+
+func (c *CheckError) CheckErrorTakeLinkFullGrpc(err error) (error, string, int) {
+	if err != nil {
+		switch err.Error() {
+		case LSHTakeLinkShortNotFound:
+			println(err.Error())
+			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			return &MyErrors{
+					Text: ErrCheck,
+				},
+				LSHTakeLinkShortNotFound, http.StatusNotFound
+		default:
+			println(err.Error())
+			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			return &MyErrors{
+					Text: ErrInternal,
+				},
+				ErrDB, http.StatusInternalServerError
+		}
+	}
+	return nil, "", IntNil
+}

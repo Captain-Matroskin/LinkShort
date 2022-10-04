@@ -9,7 +9,7 @@ import (
 
 type LinkShortAppInterface interface {
 	CreateLinkShortApp(linkFull string) (string, error)
-	TakeLinkShortApp(linkShort string) (string, error)
+	TakeLinkFullApp(linkShort string) (string, error)
 }
 
 type LinkShortApp struct {
@@ -28,6 +28,6 @@ func (l *LinkShortApp) CreateLinkShortApp(linkFull string) (string, error) {
 	return generateLinkShort, l.Wrapper.CreateLinkShort(linkFull, generateLinkShort)
 }
 
-func (l *LinkShortApp) TakeLinkShortApp(linkShort string) (string, error) {
-	return l.Wrapper.TakeLinkShort(linkShort)
+func (l *LinkShortApp) TakeLinkFullApp(linkShort string) (string, error) {
+	return l.Wrapper.TakeLinkFull(linkShort)
 }
