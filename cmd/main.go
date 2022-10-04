@@ -3,10 +3,12 @@ package main
 import (
 	"LinkShortening/build"
 	"LinkShortening/config"
+	errPkg "LinkShortening/internals/myerror"
 	proto "LinkShortening/internals/proto"
-	"fmt"
+	"LinkShortening/internals/util"
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -17,9 +19,20 @@ func main() {
 }
 
 func runServer() {
-	errConf, configRes := build.InitConfig()
-	if errConf != nil {
-		println(errConf.Error())
+	var logger util.Logger
+	logger.Log = util.NewLogger("./logs.txt")
+
+	defer func(loggerErrWarn errPkg.MultiLoggerInterface) {
+		errLogger := loggerErrWarn.Sync()
+		if errLogger != nil {
+			zap.S().Errorf("LoggerErrWarn the buffer could not be cleared %v", errLogger)
+			os.Exit(2)
+		}
+	}(logger.Log)
+
+	errConfig, configRes := build.InitConfig()
+	if errConfig != nil {
+		logger.Log.Errorf("%s", errConfig.Error())
 		os.Exit(1)
 	}
 	configMain := configRes[0].(config.MainConfig)
@@ -27,18 +40,18 @@ func runServer() {
 
 	connectionPostgres, errDB := build.CreateConn(configDB.Db)
 	if errDB != nil {
-		fmt.Println(errDB.Error())
+		logger.Log.Errorf("Err connect database: %s", errDB.Error())
 		os.Exit(2)
 	}
 	defer connectionPostgres.Close()
 
 	errCreateDB := build.CreateDB(connectionPostgres)
 	if errCreateDB != nil {
-		fmt.Println(errDB.Error())
+		logger.Log.Errorf("err create database: %s", errCreateDB.Error())
 		os.Exit(2)
 	}
 
-	startStructure := build.SetUp(connectionPostgres)
+	startStructure := build.SetUp(connectionPostgres, logger.Log)
 
 	linkShortApi := startStructure.LinkShort
 	middlewareApi := startStructure.Middle
@@ -55,7 +68,7 @@ func runServer() {
 
 	listen, errListen := net.Listen(configMain.Main.Network, addresGrpc)
 	if errListen != nil {
-		println(errListen.Error())
+		logger.Log.Errorf("Server listen grpc error: %v", errListen)
 		os.Exit(1)
 	}
 	server := grpc.NewServer()
@@ -63,18 +76,21 @@ func runServer() {
 	proto.RegisterLinkShortServiceServer(server, &startStructure.LinkShortManager)
 
 	go func() {
+		logger.Log.Infof("Listen in %s", addresGrpc)
 		errServ := server.Serve(listen)
 		if errServ != nil {
-			println(errServ.Error())
+			logger.Log.Errorf("Server serv grpc error: %v", errServ)
 			os.Exit(1)
 		}
+
 	}()
 
 	addresHttp := ":" + configMain.Main.PortHttp
 
+	logger.Log.Infof("Listen in 127:0.0.1%s", addresHttp)
 	errStart := fasthttp.ListenAndServe(addresHttp, middlewareApi.LogURL(myRouter.Handler))
 	if errStart != nil {
-		fmt.Println(errStart.Error())
+		logger.Log.Errorf("Listen and server http error: %v", errStart)
 		os.Exit(2)
 	}
 

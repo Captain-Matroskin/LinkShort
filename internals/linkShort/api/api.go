@@ -6,7 +6,6 @@ import (
 	errPkg "LinkShortening/internals/myerror"
 	"LinkShortening/internals/util"
 	"encoding/json"
-	"fmt"
 	"github.com/valyala/fasthttp"
 	"net/http"
 )
@@ -18,6 +17,7 @@ type LinkShortApiInterface interface {
 
 type LinkShortApi struct {
 	Application application.LinkShortAppInterface
+	Logger      errPkg.MultiLoggerInterface
 }
 
 func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
@@ -26,11 +26,12 @@ func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
 	if errConvert != nil {
 		ctx.Response.SetStatusCode(http.StatusInternalServerError)
 		ctx.Response.SetBody([]byte(errConvert.Error()))
-		fmt.Println(errConvert.Error())
+		l.Logger.Errorf("%s", errConvert.Error())
 	}
 
 	checkError := &errPkg.CheckError{
 		RequestId: reqId,
+		Logger:    l.Logger,
 	}
 
 	var linkFullIn linkShort.LinkFull
@@ -38,7 +39,7 @@ func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
 	if errUnmarshal != nil {
 		ctx.Response.SetStatusCode(http.StatusInternalServerError)
 		ctx.Response.SetBody([]byte(errPkg.ErrUnmarshal))
-		fmt.Println(errUnmarshal.Error())
+		l.Logger.Errorf("%s, %s, requestId: %d", errPkg.ErrUnmarshal, errUnmarshal.Error(), reqId)
 		return
 	}
 
@@ -58,7 +59,7 @@ func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	request, errRequest := json.Marshal(&util.Result{
+	request, errResponse := json.Marshal(&util.Result{
 		Status: http.StatusCreated,
 		Body: linkShort.ResponseLinkShort{
 			LinkShort: linkShort.LinkShort{
@@ -66,10 +67,10 @@ func (l *LinkShortApi) CreateLinkShortHandler(ctx *fasthttp.RequestCtx) {
 			},
 		},
 	})
-	if errRequest != nil {
+	if errResponse != nil {
 		ctx.Response.SetStatusCode(http.StatusInternalServerError)
 		ctx.Response.SetBody([]byte(errPkg.ErrEncode))
-		println(errRequest.Error())
+		l.Logger.Errorf("%s, %s, requestId: %d", errPkg.ErrEncode, errResponse.Error(), reqId)
 		return
 	}
 
@@ -84,11 +85,12 @@ func (l *LinkShortApi) TakeLinkShortHandler(ctx *fasthttp.RequestCtx) {
 	if errConvert != nil {
 		ctx.Response.SetStatusCode(http.StatusInternalServerError)
 		ctx.Response.SetBody([]byte(errConvert.Error()))
-		return
+		l.Logger.Errorf("%s", errConvert.Error())
 	}
 
 	checkError := &errPkg.CheckError{
 		RequestId: reqId,
+		Logger:    l.Logger,
 	}
 
 	var linkShortIn linkShort.LinkShort
@@ -96,7 +98,7 @@ func (l *LinkShortApi) TakeLinkShortHandler(ctx *fasthttp.RequestCtx) {
 	if errUnmarshal != nil {
 		ctx.Response.SetStatusCode(http.StatusInternalServerError)
 		ctx.Response.SetBody([]byte(errPkg.ErrUnmarshal))
-		fmt.Println(errUnmarshal.Error())
+		l.Logger.Errorf("%s, %s, requestId: %d", errPkg.ErrUnmarshal, errUnmarshal.Error(), reqId)
 		return
 	}
 
@@ -116,7 +118,7 @@ func (l *LinkShortApi) TakeLinkShortHandler(ctx *fasthttp.RequestCtx) {
 		}
 	}
 
-	request, errRequest := json.Marshal(&util.Result{
+	request, errResponse := json.Marshal(&util.Result{
 		Status: http.StatusCreated,
 		Body: linkShort.ResponseLinkFull{
 			LinkShort: linkShort.LinkFull{
@@ -124,10 +126,10 @@ func (l *LinkShortApi) TakeLinkShortHandler(ctx *fasthttp.RequestCtx) {
 			},
 		},
 	})
-	if errRequest != nil {
+	if errResponse != nil {
 		ctx.Response.SetStatusCode(http.StatusInternalServerError)
 		ctx.Response.SetBody([]byte(errPkg.ErrEncode))
-		println(errRequest.Error())
+		l.Logger.Errorf("%s, %s, requestId: %d", errPkg.ErrEncode, errResponse.Error(), reqId)
 		return
 	}
 
