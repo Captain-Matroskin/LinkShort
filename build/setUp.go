@@ -17,13 +17,13 @@ const (
 	ConfPath     = "./config/"
 )
 
-type installSetUp struct {
+type InstallSetUp struct {
 	LinkShort        api.LinkShortApi
 	Middle           apiMiddle.MiddlewareApi
 	LinkShortManager api.LinkShortManager
 }
 
-func SetUp(connectionDB orm.ConnectionInterface) *installSetUp {
+func SetUp(connectionDB orm.ConnectionInterface, logger errPkg.MultiLoggerInterface) *InstallSetUp {
 	linkShortWrapper := orm.LinkShortWrapper{
 		Conn: connectionDB,
 	}
@@ -32,18 +32,22 @@ func SetUp(connectionDB orm.ConnectionInterface) *installSetUp {
 	}
 	linkShortApi := api.LinkShortApi{
 		Application: &linkShortApp,
+		Logger:      logger,
 	}
 	var _ api.LinkShortApiInterface = &linkShortApi
 
-	middlewareApi := apiMiddle.MiddlewareApi{}
+	middlewareApi := apiMiddle.MiddlewareApi{
+		Logger: logger,
+	}
 	var _ apiMiddle.MiddlewareApiInterface = &middlewareApi
 
 	linkShortManager := api.LinkShortManager{
 		Application: &linkShortApp,
+		Logger:      logger,
 	}
 	var _ api.LinkShortManagerInterface = &linkShortManager
 
-	var result installSetUp
+	var result InstallSetUp
 	result.LinkShort = linkShortApi
 	result.Middle = middlewareApi
 	result.LinkShortManager = linkShortManager

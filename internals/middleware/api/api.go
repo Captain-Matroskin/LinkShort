@@ -1,6 +1,7 @@
 package api
 
 import (
+	errPgk "LinkShortening/internals/myerror"
 	"github.com/valyala/fasthttp"
 	"math"
 )
@@ -10,7 +11,8 @@ type MiddlewareApiInterface interface {
 }
 
 type MiddlewareApi struct {
-	ReqId int
+	ReqId  int
+	Logger errPgk.MultiLoggerInterface
 }
 
 func (m *MiddlewareApi) LogURL(h fasthttp.RequestHandler) fasthttp.RequestHandler {
@@ -19,7 +21,7 @@ func (m *MiddlewareApi) LogURL(h fasthttp.RequestHandler) fasthttp.RequestHandle
 			m.ReqId = 0
 		}
 		m.ReqId++
-		//TODO(M): logger
+		m.Logger.Infof("Method: %s, URL: %s, requestId: %d", string(ctx.Method()), ctx.URI(), m.ReqId)
 		ctx.SetUserValue("reqId", m.ReqId)
 
 		h(ctx)

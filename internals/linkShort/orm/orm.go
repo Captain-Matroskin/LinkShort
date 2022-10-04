@@ -53,8 +53,6 @@ func (w *LinkShortWrapper) CreateLinkShort(linkFull string, linkShort string) er
 	_, errExecTx := tx.Exec(contextTransaction,
 		"INSERT INTO public.link (link, link_short) VALUES ($1, $2)", linkFull, linkShort)
 	if errExecTx != nil {
-		println(errExecTx.Error())
-		println(errPkg.LSHCreateLinkShortNotInsertUniqueDB)
 		switch errExecTx.Error() {
 		case errPkg.LSHCreateLinkShortNotInsertUniqueDB:
 			return &errPkg.MyErrors{

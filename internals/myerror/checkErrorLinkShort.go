@@ -14,15 +14,13 @@ func (c *CheckError) CheckErrorCreateLinkShort(err error) (error, []byte, int) {
 				Explain: LSHCreateLinkShortNotInsertUnique,
 			})
 			if errMarshal != nil {
-				println(errMarshal.Error())
-				//c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
+				c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
 				return &MyErrors{
 						Text: ErrMarshal,
 					},
 					nil, http.StatusInternalServerError
 			}
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Warnf("%s, requestId: %d", err.Error(), c.RequestId)
 			return &MyErrors{
 					Text: ErrCheck,
 				},
@@ -34,15 +32,13 @@ func (c *CheckError) CheckErrorCreateLinkShort(err error) (error, []byte, int) {
 				Explain: ErrDB,
 			})
 			if errMarshal != nil {
-				println(errMarshal.Error())
-				//c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
+				c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
 				return &MyErrors{
 						Text: ErrMarshal,
 					},
 					nil, http.StatusInternalServerError
 			}
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Errorf("%s, requestId: %d", err.Error(), c.RequestId)
 			return &MyErrors{
 					Text: ErrCheck,
 				},
@@ -63,15 +59,13 @@ func (c *CheckError) CheckErrorTakeLinkShort(err error) (error, []byte, int) {
 				Explain: LSHTakeLinkShortNotFound,
 			})
 			if errMarshal != nil {
-				println(errMarshal.Error())
-				//c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
+				c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
 				return &MyErrors{
 						Text: ErrMarshal,
 					},
 					nil, http.StatusInternalServerError
 			}
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Warnf("%s, requestId: %d", err.Error(), c.RequestId)
 			return &MyErrors{
 					Text: ErrCheck,
 				},
@@ -83,15 +77,13 @@ func (c *CheckError) CheckErrorTakeLinkShort(err error) (error, []byte, int) {
 				Explain: ErrDB,
 			})
 			if errMarshal != nil {
-				println(errMarshal.Error())
-				//c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
+				c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)
 				return &MyErrors{
 						Text: ErrMarshal,
 					},
 					nil, http.StatusInternalServerError
 			}
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Errorf("%s, requestId: %d", err.Error(), c.RequestId)
 			return &MyErrors{
 					Text: ErrCheck,
 				},
@@ -107,15 +99,13 @@ func (c *CheckError) CheckErrorCreateLinkShortGrpc(err error) (error, string, in
 	if err != nil {
 		switch err.Error() {
 		case LSHCreateLinkShortNotInsertUnique:
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Warnf("%s, requestId: %d", LSHCreateLinkShortNotInsertUnique, c.RequestId)
 			return &MyErrors{
 					Text: ErrCheck,
 				},
 				LSHCreateLinkShortNotInsertUnique, http.StatusConflict
 		default:
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Errorf("%s, requestId: %d", err.Error(), c.RequestId)
 			return &MyErrors{
 					Text: ErrInternal,
 				},
@@ -129,15 +119,13 @@ func (c *CheckError) CheckErrorTakeLinkFullGrpc(err error) (error, string, int) 
 	if err != nil {
 		switch err.Error() {
 		case LSHTakeLinkShortNotFound:
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Warnf("%s, requestId: %d", LSHTakeLinkShortNotFound, c.RequestId)
 			return &MyErrors{
 					Text: ErrCheck,
 				},
 				LSHTakeLinkShortNotFound, http.StatusNotFound
 		default:
-			println(err.Error())
-			//c.Logger.Errorf("%s, requestId: %d", ADeleteCookieCookieNotDelete, c.RequestId)
+			c.Logger.Errorf("%s, requestId: %d", err.Error(), c.RequestId)
 			return &MyErrors{
 					Text: ErrInternal,
 				},
