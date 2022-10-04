@@ -9,8 +9,8 @@ import (
 )
 
 type LinkShortManagerInterface interface {
-	CreateLinkShort(ctx context.Context, linkFull *proto.LinkFull) (*proto.ResultLinkShort, error)
-	TakeLinkFull(ctx context.Context, linkShort *proto.LinkShort) (*proto.ResultLinkFull, error)
+	CreateLinkShort(ctx context.Context, linkFullIn *proto.LinkFull) (*proto.ResultLinkShort, error)
+	TakeLinkFull(ctx context.Context, linkShortIn *proto.LinkShort) (*proto.ResultLinkFull, error)
 }
 
 type LinkShortManager struct {
@@ -37,7 +37,21 @@ func (l *LinkShortManager) CreateLinkShort(ctx context.Context, linkFullIn *prot
 
 }
 
-func (l *LinkShortManager) TakeLinkFull(ctx context.Context, linkShort *proto.LinkShort) (*proto.ResultLinkFull, error) {
+func (l *LinkShortManager) TakeLinkFull(ctx context.Context, linkShortIn *proto.LinkShort) (*proto.ResultLinkFull, error) {
+	checkError := &errPkg.CheckError{}
 
-	return &proto.ResultLinkFull{}, nil
+	linkFullOut, errIn := l.Application.TakeLinkFullApp(linkShortIn.LinkShort)
+
+	errOut, resultOut, codeHTTP := checkError.CheckErrorCreateLinkShortGrpc(errIn)
+	if errOut != nil {
+		switch errOut.Error() {
+		case errPkg.ErrCheck:
+			return &proto.ResultLinkFull{Error: resultOut, StatusCode: int64(codeHTTP)}, nil
+		case errPkg.ErrInternal:
+			return &proto.ResultLinkFull{}, &errPkg.MyErrors{Text: resultOut}
+
+		}
+	}
+
+	return &proto.ResultLinkFull{StatusCode: http.StatusOK, Body: &proto.LinkFull{LinkFull: linkFullOut}}, nil
 }
