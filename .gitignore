@@ -22,7 +22,7 @@
 
 # configs
 **/*.env
-/config/*.yml
+#/config/*.yml
 
 #tests files
 cover
