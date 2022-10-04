@@ -17,15 +17,15 @@ func main() {
 }
 
 func runServer() {
-	dbConfig := config.Database{ //TODO(N): refactor in config
-		Host:       "127.0.0.1",
-		Port:       "5432",
-		UserName:   "Captain-matroskin",
-		Password:   "74tbr6r54f78",
-		SchemaName: "postgres",
+	errConf, configRes := build.InitConfig()
+	if errConf != nil {
+		println(errConf.Error())
+		os.Exit(1)
 	}
+	configMain := configRes[0].(config.MainConfig)
+	configDB := configRes[1].(config.DBConfig)
 
-	connectionPostgres, errDB := build.CreateConn(dbConfig)
+	connectionPostgres, errDB := build.CreateConn(configDB.Db)
 	if errDB != nil {
 		fmt.Println(errDB.Error())
 		os.Exit(2)
@@ -51,8 +51,9 @@ func runServer() {
 	linkShort.POST("/", linkShortApi.CreateLinkShortHandler)
 	linkShort.GET("/", linkShortApi.TakeLinkShortHandler)
 	//myRouter.GET("/health", )
+	addresGrpc := configMain.Main.HostGrpc + ":" + configMain.Main.PortGrpc
 
-	listen, errListen := net.Listen("tcp", "127.0.0.1:8081")
+	listen, errListen := net.Listen(configMain.Main.Network, addresGrpc)
 	if errListen != nil {
 		println(errListen.Error())
 		os.Exit(1)
@@ -69,7 +70,9 @@ func runServer() {
 		}
 	}()
 
-	errStart := fasthttp.ListenAndServe(":5000", middlewareApi.LogURL(myRouter.Handler))
+	addresHttp := ":" + configMain.Main.PortHttp
+
+	errStart := fasthttp.ListenAndServe(addresHttp, middlewareApi.LogURL(myRouter.Handler))
 	if errStart != nil {
 		fmt.Println(errStart.Error())
 		os.Exit(2)
