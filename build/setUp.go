@@ -1,15 +1,16 @@
 package build
 
 import (
-	apiLink "LinkShortening/internals/linkShort/api"
+	api "LinkShortening/internals/linkShort/api"
 	"LinkShortening/internals/linkShort/application"
 	"LinkShortening/internals/linkShort/orm"
 	apiMiddle "LinkShortening/internals/middleware/api"
 )
 
 type installSetUp struct {
-	LinkShort apiLink.LinkShortApi
-	Middle    apiMiddle.MiddlewareApi
+	LinkShort        api.LinkShortApi
+	Middle           apiMiddle.MiddlewareApi
+	LinkShortManager api.LinkShortManager
 }
 
 func SetUp(connectionDB orm.ConnectionInterface) *installSetUp {
@@ -19,16 +20,23 @@ func SetUp(connectionDB orm.ConnectionInterface) *installSetUp {
 	linkShortApp := application.LinkShortApp{
 		Wrapper: &linkShortWrapper,
 	}
-	linkShortApi := apiLink.LinkShortApi{
+	linkShortApi := api.LinkShortApi{
 		Application: &linkShortApp,
 	}
-	var _ apiLink.LinkShortApiInterface = &linkShortApi
+	var _ api.LinkShortApiInterface = &linkShortApi
 
 	middlewareApi := apiMiddle.MiddlewareApi{}
 	var _ apiMiddle.MiddlewareApiInterface = &middlewareApi
 
+	linkShortManager := api.LinkShortManager{
+		Application: &linkShortApp,
+	}
+	var _ api.LinkShortManagerInterface = &linkShortManager
+
 	var result installSetUp
 	result.LinkShort = linkShortApi
+	result.Middle = middlewareApi
+	result.LinkShortManager = linkShortManager
 
 	return &result
 }

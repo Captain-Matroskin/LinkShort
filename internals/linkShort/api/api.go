@@ -100,7 +100,7 @@ func (l *LinkShortApi) TakeLinkShortHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	linkFullOut, errIn := l.Application.TakeLinkShortApp(linkShortIn.Link)
+	linkFullOut, errIn := l.Application.TakeLinkFullApp(linkShortIn.Link)
 
 	errOut, resultOut, codeHTTP := checkError.CheckErrorTakeLinkShort(errIn)
 	if errOut != nil {

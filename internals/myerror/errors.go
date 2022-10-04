@@ -27,6 +27,7 @@ const (
 	ErrMarshal         = "marshaling in json"
 	ErrCheck           = "err check"
 	ErrEncode          = "Encode"
+	ErrInternal        = "err internal"
 )
 
 // Error of main

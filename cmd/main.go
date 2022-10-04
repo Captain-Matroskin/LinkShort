@@ -3,9 +3,12 @@ package main
 import (
 	"LinkShortening/build"
 	"LinkShortening/config"
+	proto "LinkShortening/internals/proto"
 	"fmt"
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
+	"google.golang.org/grpc"
+	"net"
 	"os"
 )
 
@@ -49,9 +52,27 @@ func runServer() {
 	linkShort.GET("/", linkShortApi.TakeLinkShortHandler)
 	//myRouter.GET("/health", )
 
+	listen, errListen := net.Listen("tcp", "127.0.0.1:8081")
+	if errListen != nil {
+		println(errListen.Error())
+		os.Exit(1)
+	}
+	server := grpc.NewServer()
+
+	proto.RegisterLinkShortServiceServer(server, &startStructure.LinkShortManager)
+
+	go func() {
+		errServ := server.Serve(listen)
+		if errServ != nil {
+			println(errServ.Error())
+			os.Exit(1)
+		}
+	}()
+
 	errStart := fasthttp.ListenAndServe(":5000", middlewareApi.LogURL(myRouter.Handler))
 	if errStart != nil {
 		fmt.Println(errStart.Error())
 		os.Exit(2)
 	}
+
 }
