@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func CreateConn(configDB config.Database) (*pgxpool.Pool, error) {
+func CreateConn(configDB config.DatabasePostgres) (*pgxpool.Pool, error) {
 	addressPostgres := "postgres://" + configDB.UserName + ":" + configDB.Password +
 		"@" + configDB.Host + ":" + configDB.Port + "/" + configDB.SchemaName
 

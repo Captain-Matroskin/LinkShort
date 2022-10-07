@@ -23,9 +23,10 @@ type InstallSetUp struct {
 	LinkShortManager api.LinkShortManager
 }
 
-func SetUp(connectionDB orm.ConnectionInterface, logger errPkg.MultiLoggerInterface) *InstallSetUp {
+func SetUp(connectionDB orm.ConnectionPostgresInterface, redisConn orm.ConnectionRedisInterface, logger errPkg.MultiLoggerInterface) *InstallSetUp {
 	linkShortWrapper := orm.LinkShortWrapper{
-		Conn: connectionDB,
+		ConnPostgres: connectionDB,
+		ConnRedis:    redisConn,
 	}
 	linkShortApp := application.LinkShortApp{
 		Wrapper: &linkShortWrapper,

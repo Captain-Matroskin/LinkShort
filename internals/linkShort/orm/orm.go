@@ -3,16 +3,21 @@ package orm
 import (
 	errPkg "LinkShortening/internals/myerror"
 	"context"
+	"github.com/gomodule/redigo/redis"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 )
 
 type LinkShortWrapperInterface interface {
+	CreateLinkShortPostgres(linkFull string, linkShort string) error
+	TakeLinkFullPostgres(linkShort string) (string, error)
+	CreateLinkShortRedis(linkFull string, linkShort string) error
+	TakeLinkFullRedis(linkShort string) (string, error)
 	CreateLinkShort(linkFull string, linkShort string) error
 	TakeLinkFull(linkShort string) (string, error)
 }
 
-type ConnectionInterface interface {
+type ConnectionPostgresInterface interface {
 	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
 	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
 	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
@@ -35,13 +40,85 @@ type TransactionInterface interface {
 	Conn() *pgx.Conn
 }
 
+type ConnectionRedisInterface interface {
+	Close() error
+	Err() error
+	Do(commandName string, args ...interface{}) (reply interface{}, err error)
+	Send(commandName string, args ...interface{}) error
+	Flush() error
+	Receive() (reply interface{}, err error)
+}
+
 type LinkShortWrapper struct {
-	Conn ConnectionInterface
+	ConnPostgres ConnectionPostgresInterface
+	ConnRedis    ConnectionRedisInterface
 }
 
 func (w *LinkShortWrapper) CreateLinkShort(linkFull string, linkShort string) error {
+	if w.ConnPostgres != nil {
+		return w.CreateLinkShortPostgres(linkFull, linkShort)
+	}
+	if w.ConnRedis != nil {
+		return w.CreateLinkShortRedis(linkFull, linkShort)
+	}
+
+	return &errPkg.MyErrors{
+		Text: errPkg.LSHCreateLinkShortNilConn,
+	}
+}
+
+func (w *LinkShortWrapper) TakeLinkFull(linkShort string) (string, error) {
+	if w.ConnPostgres != nil {
+		return w.TakeLinkFullPostgres(linkShort)
+	}
+	if w.ConnRedis != nil {
+		return w.TakeLinkFullRedis(linkShort)
+	}
+
+	return "", &errPkg.MyErrors{
+		Text: errPkg.LSHTakeLinkShortNilConn,
+	}
+}
+
+func (w *LinkShortWrapper) CreateLinkShortRedis(linkFull string, linkShort string) error {
+	full, _ := w.TakeLinkFullRedis(linkFull)
+	if full != "" {
+		return &errPkg.MyErrors{
+			Text: errPkg.LSHCreateLinkShortExistsRedis,
+		}
+	}
+
+	_, errLinkFull := redis.String(w.ConnRedis.Do("SET", linkFull, linkShort, "EX", 86400))
+	if errLinkFull != nil {
+		return &errPkg.MyErrors{
+			Text: errPkg.LSHCreateLinkShortNotSetFullLinkRedis,
+		}
+	}
+
+	_, errLinkShort := redis.String(w.ConnRedis.Do("SET", linkShort, linkFull, "EX", 86400))
+	if errLinkShort != nil {
+		return &errPkg.MyErrors{
+			Text: errPkg.LSHCreateLinkShortNotSetShortLinkRedis,
+		}
+	}
+
+	return nil
+}
+
+func (w *LinkShortWrapper) TakeLinkFullRedis(linkShort string) (string, error) {
+	resultGet, errGet := redis.Bytes(w.ConnRedis.Do("GET", linkShort))
+	if errGet != nil {
+		return "", &errPkg.MyErrors{
+			Text: errPkg.LSHTakeLinkShortNotFoundRedis,
+		}
+	}
+
+	return string(resultGet), nil
+}
+
+func (w *LinkShortWrapper) CreateLinkShortPostgres(linkFull string, linkShort string) error {
 	contextTransaction := context.Background()
-	tx, errBeginConn := w.Conn.Begin(contextTransaction)
+	tx, errBeginConn := w.ConnPostgres.Begin(contextTransaction)
 	if errBeginConn != nil {
 		return &errPkg.MyErrors{
 			Text: errPkg.LSHCreateLinkShortTransactionNotCreate,
@@ -75,9 +152,9 @@ func (w *LinkShortWrapper) CreateLinkShort(linkFull string, linkShort string) er
 	return nil
 }
 
-func (w *LinkShortWrapper) TakeLinkFull(linkShort string) (string, error) {
+func (w *LinkShortWrapper) TakeLinkFullPostgres(linkShort string) (string, error) {
 	contextTransaction := context.Background()
-	tx, errBeginConn := w.Conn.Begin(contextTransaction)
+	tx, errBeginConn := w.ConnPostgres.Begin(contextTransaction)
 	if errBeginConn != nil {
 		return "", &errPkg.MyErrors{
 			Text: errPkg.LSHTakeLinkShortTransactionNotCreate,
@@ -89,7 +166,7 @@ func (w *LinkShortWrapper) TakeLinkFull(linkShort string) (string, error) {
 	var linkFull string
 	errQueryRow := tx.QueryRow(contextTransaction,
 		"SELECT link FROM public.link WHERE link_short = $1",
-		linkShort).Scan(linkFull)
+		linkShort).Scan(&linkFull)
 	if errQueryRow != nil {
 		if errQueryRow == pgx.ErrNoRows {
 			return "", &errPkg.MyErrors{

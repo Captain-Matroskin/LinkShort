@@ -50,15 +50,22 @@ const (
 
 // Error of LinkShort
 const (
-	LSHCreateLinkShortTransactionNotCreate = "transaction Create Link Short not create CreateLinkShort"
-	LSHCreateLinkShortNotInsert            = "Link short not insert CreateLinkShort"
-	LSHCreateLinkShortNotCommit            = "Link short not commit CreateLinkShort"
+	LSHCreateLinkShortTransactionNotCreate = "transaction Create Link Short not create CreateLinkShortPostgres"
+	LSHCreateLinkShortNotInsert            = "Link short not insert CreateLinkShortPostgres"
+	LSHCreateLinkShortNotCommit            = "Link short not commit CreateLinkShortPostgres"
 	LSHCreateLinkShortNotInsertUniqueDB    = "ERROR: duplicate key value violates unique constraint \"link_link_key\" (SQLSTATE 23505)"
-	LSHCreateLinkShortNotInsertUnique      = "link is not unique CreateLinkShort"
-	LSHCreateLinkShortAppNotGenerate       = "link is not generate CreateLinkShort"
+	LSHCreateLinkShortNotInsertUnique      = "link is not unique CreateLinkShortPostgres"
+	LSHCreateLinkShortAppNotGenerate       = "link is not generate CreateLinkShortPostgres"
 
 	LSHTakeLinkShortTransactionNotCreate = "transaction Take Link Short not create"
 	LSHTakeLinkShortNotFound             = "link full not found"
 	LSHTakeLinkShortNotScan              = "link full not scan"
 	LSHTakeLinkShortNotCommit            = "Link full not commit"
+
+	LSHTakeLinkShortNotFoundRedis          = "link full not found"
+	LSHCreateLinkShortExistsRedis          = "link full exists"
+	LSHCreateLinkShortNotSetFullLinkRedis  = "link is not set fullLink"
+	LSHCreateLinkShortNotSetShortLinkRedis = "link is not set shortLink"
+	LSHCreateLinkShortNilConn              = "connect is nil"
+	LSHTakeLinkShortNilConn                = "connect is nil"
 )

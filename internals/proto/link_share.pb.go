@@ -302,10 +302,10 @@ var file_link_share_proto_goTypes = []interface{}{
 var file_link_share_proto_depIdxs = []int32{
 	0, // 0: proto.ResultLinkShort.body:type_name -> proto.LinkShort
 	1, // 1: proto.ResultLinkFull.body:type_name -> proto.LinkFull
-	1, // 2: proto.LinkShortService.CreateLinkShort:input_type -> proto.LinkFull
-	0, // 3: proto.LinkShortService.TakeLinkFull:input_type -> proto.LinkShort
-	2, // 4: proto.LinkShortService.CreateLinkShort:output_type -> proto.ResultLinkShort
-	3, // 5: proto.LinkShortService.TakeLinkFull:output_type -> proto.ResultLinkFull
+	1, // 2: proto.LinkShortService.CreateLinkShortPostgres:input_type -> proto.LinkFull
+	0, // 3: proto.LinkShortService.TakeLinkFullPostgres:input_type -> proto.LinkShort
+	2, // 4: proto.LinkShortService.CreateLinkShortPostgres:output_type -> proto.ResultLinkShort
+	3, // 5: proto.LinkShortService.TakeLinkFullPostgres:output_type -> proto.ResultLinkFull
 	4, // [4:6] is the sub-list for method output_type
 	2, // [2:4] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -414,7 +414,7 @@ func NewLinkShortServiceClient(cc grpc.ClientConnInterface) LinkShortServiceClie
 
 func (c *linkShortServiceClient) CreateLinkShort(ctx context.Context, in *LinkFull, opts ...grpc.CallOption) (*ResultLinkShort, error) {
 	out := new(ResultLinkShort)
-	err := c.cc.Invoke(ctx, "/proto.LinkShortService/CreateLinkShort", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.LinkShortService/CreateLinkShortPostgres", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +423,7 @@ func (c *linkShortServiceClient) CreateLinkShort(ctx context.Context, in *LinkFu
 
 func (c *linkShortServiceClient) TakeLinkFull(ctx context.Context, in *LinkShort, opts ...grpc.CallOption) (*ResultLinkFull, error) {
 	out := new(ResultLinkFull)
-	err := c.cc.Invoke(ctx, "/proto.LinkShortService/TakeLinkFull", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.LinkShortService/TakeLinkFullPostgres", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -441,10 +441,10 @@ type UnimplementedLinkShortServiceServer struct {
 }
 
 func (*UnimplementedLinkShortServiceServer) CreateLinkShort(context.Context, *LinkFull) (*ResultLinkShort, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateLinkShort not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method CreateLinkShortPostgres not implemented")
 }
 func (*UnimplementedLinkShortServiceServer) TakeLinkFull(context.Context, *LinkShort) (*ResultLinkFull, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TakeLinkFull not implemented")
+	return nil, status.Errorf(codes.Unimplemented, "method TakeLinkFullPostgres not implemented")
 }
 
 func RegisterLinkShortServiceServer(s *grpc.Server, srv LinkShortServiceServer) {
@@ -461,7 +461,7 @@ func _LinkShortService_CreateLinkShort_Handler(srv interface{}, ctx context.Cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.LinkShortService/CreateLinkShort",
+		FullMethod: "/proto.LinkShortService/CreateLinkShortPostgres",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LinkShortServiceServer).CreateLinkShort(ctx, req.(*LinkFull))
@@ -479,7 +479,7 @@ func _LinkShortService_TakeLinkFull_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.LinkShortService/TakeLinkFull",
+		FullMethod: "/proto.LinkShortService/TakeLinkFullPostgres",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LinkShortServiceServer).TakeLinkFull(ctx, req.(*LinkShort))
@@ -492,11 +492,11 @@ var _LinkShortService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*LinkShortServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateLinkShort",
+			MethodName: "CreateLinkShortPostgres",
 			Handler:    _LinkShortService_CreateLinkShort_Handler,
 		},
 		{
-			MethodName: "TakeLinkFull",
+			MethodName: "TakeLinkFullPostgres",
 			Handler:    _LinkShortService_TakeLinkFull_Handler,
 		},
 	},

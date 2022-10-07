@@ -7,11 +7,18 @@ import (
 	proto "LinkShortening/internals/proto"
 	"LinkShortening/internals/util"
 	"github.com/fasthttp/router"
+	"github.com/gomodule/redigo/redis"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/valyala/fasthttp"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
 	"os"
+)
+
+const (
+	namePostgres = "postgres"
+	nameRedis    = "redis"
 )
 
 func main() {
@@ -38,20 +45,43 @@ func runServer() {
 	configMain := configRes[0].(config.MainConfig)
 	configDB := configRes[1].(config.DBConfig)
 
-	connectionPostgres, errDB := build.CreateConn(configDB.Db)
-	if errDB != nil {
-		logger.Log.Errorf("Err connect database: %s", errDB.Error())
+	var (
+		connectionPostgres *pgxpool.Pool
+		redisConn          redis.Conn
+		startStructure     *build.InstallSetUp
+	)
+	switch configMain.Main.Database {
+	case namePostgres:
+		var errDB error
+		connectionPostgres, errDB = build.CreateConn(configDB.DbPostgres)
+		if errDB != nil {
+			logger.Log.Errorf("Err connect database: %s", errDB.Error())
+			os.Exit(2)
+		}
+		defer connectionPostgres.Close()
+
+		errCreateDB := build.CreateDB(connectionPostgres)
+		if errCreateDB != nil {
+			logger.Log.Errorf("err create database: %s", errCreateDB.Error())
+			os.Exit(2)
+		}
+		startStructure = build.SetUp(connectionPostgres, nil, logger.Log)
+	case nameRedis:
+		var errConn error
+		address := configDB.DbRedis.Host + ":" + configDB.DbRedis.Port
+		redisConn, errConn = redis.Dial(
+			configDB.DbRedis.Network, address,
+			redis.DialPassword(configDB.DbRedis.Password),
+		)
+		if errConn != nil {
+			logger.Log.Errorf("err create database: %s", errConn.Error())
+			os.Exit(2)
+		}
+		startStructure = build.SetUp(nil, redisConn, logger.Log)
+	default:
+		logger.Log.Errorf("data base not selected")
 		os.Exit(2)
 	}
-	defer connectionPostgres.Close()
-
-	errCreateDB := build.CreateDB(connectionPostgres)
-	if errCreateDB != nil {
-		logger.Log.Errorf("err create database: %s", errCreateDB.Error())
-		os.Exit(2)
-	}
-
-	startStructure := build.SetUp(connectionPostgres, logger.Log)
 
 	linkShortApi := startStructure.LinkShort
 	middlewareApi := startStructure.Middle

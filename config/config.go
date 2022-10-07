@@ -1,6 +1,6 @@
 package config
 
-type Database struct {
+type DatabasePostgres struct {
 	Host       string
 	Port       string
 	UserName   string
@@ -8,8 +8,16 @@ type Database struct {
 	SchemaName string
 }
 
+type DatabaseRedis struct {
+	Host     string
+	Port     string
+	Password string
+	Network  string
+}
+
 type DBConfig struct {
-	Db Database `mapstructure:"db"`
+	DbPostgres DatabasePostgres `mapstructure:"db_postgres"`
+	DbRedis    DatabaseRedis    `mapstructure:"db_redis"`
 }
 
 type MainConfig struct {
@@ -21,4 +29,5 @@ type Main struct {
 	PortGrpc string
 	Network  string
 	PortHttp string
+	Database string
 }
