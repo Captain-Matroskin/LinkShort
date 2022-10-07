@@ -8,10 +8,10 @@ import (
 func (c *CheckError) CheckErrorCreateLinkShort(err error) (error, []byte, int) {
 	if err != nil {
 		switch err.Error() {
-		case LSHCreateLinkShortNotInsertUnique:
+		case LSHCreateLinkShortNotInsertUnique, LSHCreateLinkShortExistsRedis:
 			result, errMarshal := json.Marshal(ResultError{
 				Status:  http.StatusConflict,
-				Explain: LSHCreateLinkShortNotInsertUnique,
+				Explain: err.Error(),
 			})
 			if errMarshal != nil {
 				c.Logger.Errorf("%s, %v, requestId: %d", ErrMarshal, errMarshal, c.RequestId)

@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/gomodule/redigo v1.8.9
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/spf13/viper v1.13.0
 	go.uber.org/zap v1.17.0
