@@ -1,3 +1,5 @@
+//go:generate mockgen -destination=mocks/api.go -package=mocks LinkShortening/internals/myerror MultiLoggerInterface
+//go:generate mockgen -destination=mocks/apiApplication.go -package=mocks LinkShortening/internals/linkShort/application LinkShortAppInterface
 package api
 
 import (
